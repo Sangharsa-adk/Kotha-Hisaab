@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kotha Hisaab - Tenant's Monthly Room Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
     <style>
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -176,7 +177,7 @@
                 });
             }
             
-            msg += `\n💰 *Total Due Amount: Rs. ${item.grandTotal.toFixed(0)}*\n\n_Generated via BijuliHisaab App_`;
+            msg += `\n💰 *Total Due Amount: Rs. ${item.grandTotal.toFixed(0)}*\n\n_Generated via Kotha Hisaab App_`;
             return msg;
         }
 

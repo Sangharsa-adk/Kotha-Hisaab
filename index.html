@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotha Hisaab - Tenant's Monthly Room Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased pb-12">
+
+    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-3.5 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight">⚡ Kotha Hisaab</h1>
+            <span class="text-xs bg-indigo-700 px-2.5 py-1 rounded-full font-medium">Full History Share Edition</span>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-4">
+        <div class="flex bg-slate-200 p-1 rounded-xl mb-4 text-sm font-medium">
+            <button onclick="switchTab('calculator')" id="tab-calculator" class="flex-1 py-2 text-center rounded-lg bg-white shadow-sm text-indigo-600">Quick Check</button>
+            <button onclick="switchTab('myroom')" id="tab-myroom" class="flex-1 py-2 text-center rounded-lg text-slate-600">My Payment History</button>
+        </div>
+
+        <div id="content-calculator" class="tab-content active space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <h2 class="text-base font-bold mb-4 text-slate-700">Calculate My Total Monthly Bill</h2>
+                
+                <div class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Monthly Room Rent</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-slate-400 text-sm">Rs.</span>
+                            </div>
+                            <input type="number" id="room-rent" value="6000" placeholder="e.g. 5000 or 8000" class="w-full bg-slate-100 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="border-t border-b border-slate-100 py-3 my-2 space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Landlord's Electricity Rate (Per Unit)</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 text-sm">Rs.</span>
+                                </div>
+                                <input type="number" id="custom-rate" value="10" placeholder="e.g. 10 or 15" class="w-full bg-slate-100 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm font-bold text-indigo-600 focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Previous Meter Unit</label>
+                                <input type="number" id="prev" placeholder="e.g. 450" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Current Meter Unit</label>
+                                <input type="number" id="curr" placeholder="e.g. 512" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Optional Charges (Water, Garbage, etc.)</label>
+                            <button onclick="addOptionalFieldRow()" type="button" class="text-xs text-indigo-600 font-bold hover:text-indigo-800 transition">+ Add Item</button>
+                        </div>
+                        
+                        <div id="optional-fields-container" class="space-y-2">
+                            </div>
+                    </div>
+
+                    <button onclick="calculateTenantTotal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition duration-200 text-sm mt-4">Generate Monthly Cost</button>
+                </div>
+            </div>
+
+            <div id="output-card" class="hidden bg-indigo-50 border border-indigo-200 p-5 rounded-2xl shadow-inner text-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-indigo-900 text-base">Monthly Bill Breakdown</h3>
+                    <button onclick="saveToHistory()" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-xs font-medium hover:bg-indigo-700 transition">💾 Log This Month</button>
+                </div>
+                <div id="breakdown-list" class="space-y-1.5 text-slate-700">
+                    </div>
+                
+                <button id="universal-share-btn" class="w-full mt-4 bg-white border border-indigo-300 hover:bg-indigo-100 text-indigo-800 font-bold py-3 rounded-xl text-xs flex justify-center items-center gap-1.5 transition shadow-sm">
+                    📤 Share Summary (Viber, SMS, Messenger, etc.)
+                </button>
+            </div>
+        </div>
+
+        <div id="content-myroom" class="tab-content space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-slate-700">Historical Rent & Bill Receipts</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Track your past monthly outflows seamlessly.</p>
+                </div>
+                <button onclick="clearHistory()" class="text-xs text-red-500 border border-red-200 px-2.5 py-1 rounded-lg hover:bg-red-50 transition">Clear History</button>
+            </div>
+
+            <div id="history-container" class="space-y-2.5">
+                </div>
+        </div>
+    </main>
+
+    <script>
+        let billHistory = JSON.parse(localStorage.getItem('tenant_dynamic_history')) || [];
+        let currentCalculatedObj = null;
+
+        window.onload = function() {
+            if(localStorage.getItem('last_saved_rent')) document.getElementById('room-rent').value = localStorage.getItem('last_saved_rent');
+            if(localStorage.getItem('last_saved_rate')) document.getElementById('custom-rate').value = localStorage.getItem('last_saved_rate');
+            
+            const savedFields = JSON.parse(localStorage.getItem('last_saved_optional_fields'));
+            if (savedFields && savedFields.length > 0) {
+                savedFields.forEach(f => addOptionalFieldRow(f.name, f.value));
+            } else {
+                addOptionalFieldRow("Water", 150);
+                addOptionalFieldRow("Garbage", 100);
+            }
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`content-${tabId}`).classList.add('active');
+            
+            document.getElementById('tab-calculator').className = tabId === 'calculator' ? 'flex-1 py-2 text-center rounded-lg bg-white shadow-sm text-indigo-600' : 'flex-1 py-2 text-center rounded-lg text-slate-600';
+            document.getElementById('tab-myroom').className = tabId === 'myroom' ? 'flex-1 py-2 text-center rounded-lg bg-white shadow-sm text-indigo-600' : 'flex-1 py-2 text-center rounded-lg text-slate-600';
+            
+            if(tabId === 'myroom') renderHistory();
+        }
+
+        function addOptionalFieldRow(name = "", value = "") {
+            const container = document.getElementById('optional-fields-container');
+            const rowId = 'row-' + Date.now() + Math.random().toString(36).substr(2, 4);
+            
+            const row = document.createElement('div');
+            row.id = rowId;
+            row.className = "flex gap-2 items-center optional-field-entry";
+            row.innerHTML = `
+                <input type="text" value="${name}" placeholder="Label (e.g. Water)" class="opt-name w-1/2 bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                <div class="relative w-1/2 rounded-xl shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                        <span class="text-slate-400 text-[10px]">Rs.</span>
+                    </div>
+                    <input type="number" value="${value}" placeholder="Amount" class="opt-value w-full bg-slate-100 border border-slate-200 rounded-xl pl-7 pr-7 py-2 text-xs font-bold text-slate-700 focus:outline-none">
+                </div>
+                <button onclick="document.getElementById('${rowId}').remove()" type="button" class="text-red-400 hover:text-red-600 text-sm font-bold px-1">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function getOptionalFieldsData() {
+            const fields = [];
+            document.querySelectorAll('.optional-field-entry').forEach(row => {
+                const name = row.querySelector('.opt-name').value.trim();
+                const value = parseFloat(row.querySelector('.opt-value').value) || 0;
+                if (name) {
+                    fields.push({ name, value });
+                }
+            });
+            return fields;
+        }
+
+        // Shared utility function to build consistent text payload templates across modules
+        function generateShareableText(item) {
+            let msg = `🏠 *Monthly Room Bill Summary*\n📅 Month: ${item.date}\n\n`;
+            msg += `• Room Rent: Rs. ${item.rent}\n`;
+            msg += `• Electricity: ${item.units} units (${item.prev} to ${item.curr}) @ Rs. ${item.rate}/unit = Rs. ${item.elecCost.toFixed(0)}\n`;
+            
+            if(item.optionalFields && item.optionalFields.length > 0) {
+                item.optionalFields.forEach(f => {
+                    msg += `• ${f.name}: Rs. ${f.value}\n`;
+                });
+            }
+            
+            msg += `\n💰 *Total Due Amount: Rs. ${item.grandTotal.toFixed(0)}*\n\n_Generated via BijuliHisaab App_`;
+            return msg;
+        }
+
+        // Execution module connecting text compilation directly into the native sharing system
+        async function executeNativeShare(textData) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Monthly Rent Summary', text: textData });
+                } catch (err) {
+                    console.log("Share skipped", err);
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(textData);
+                    alert("📋 Summary copied to clipboard! Paste it into Viber, SMS, or Messenger manually.");
+                } catch (err) {
+                    alert("Unable to copy automatically. Please use screenshots.");
+                }
+            }
+        }
+
+        function calculateTenantTotal() {
+            const rent = parseFloat(document.getElementById('room-rent').value) || 0;
+            const rate = parseFloat(document.getElementById('custom-rate').value) || 0;
+            const prev = parseFloat(document.getElementById('prev').value) || 0;
+            const curr = parseFloat(document.getElementById('curr').value) || 0;
+
+            if (curr < prev) {
+                alert("Error: Current meter reading cannot be lower than previous month!");
+                return;
+            }
+
+            const optionalFields = getOptionalFieldsData();
+            
+            localStorage.setItem('last_saved_rent', rent);
+            localStorage.setItem('last_saved_rate', rate);
+            localStorage.setItem('last_saved_optional_fields', JSON.stringify(optionalFields));
+
+            const units = curr - prev;
+            const elecCost = units * rate;
+            
+            let extraChargesTotal = 0;
+            optionalFields.forEach(f => extraChargesTotal += f.value);
+
+            const grandTotal = rent + elecCost + extraChargesTotal;
+            const currentMonthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            currentCalculatedObj = {
+                date: currentMonthName,
+                rent,
+                prev,
+                curr,
+                units,
+                rate,
+                elecCost,
+                optionalFields,
+                grandTotal
+            };
+
+            const breakdownContainer = document.getElementById('breakdown-list');
+            let innerHTMLStructure = `
+                <p class="flex justify-between"><span>Base Room Rent:</span> <span class="font-medium text-slate-900">Rs. ${rent.toFixed(2)}</span></p>
+                <p class="flex justify-between"><span>Electricity Consumed:</span> <span class="font-medium text-slate-900">${units} units (${prev} ➔ ${curr})</span></p>
+                <p class="flex justify-between"><span>Electricity Cost (Rs. ${rate}/unit):</span> <span class="font-medium text-slate-900">Rs. ${elecCost.toFixed(2)}</span></p>
+            `;
+
+            optionalFields.forEach(f => {
+                innerHTMLStructure += `<p class="flex justify-between"><span>${f.name}:</span> <span class="font-medium text-slate-900">Rs. ${f.value.toFixed(2)}</span></p>`;
+            });
+
+            innerHTMLStructure += `
+                <hr class="border-indigo-200 my-2">
+                <p class="flex justify-between text-base font-bold text-slate-900"><span>Grand Total:</span> <span id="out-total" class="text-indigo-700 text-xl font-extrabold">Rs. ${grandTotal.toFixed(2)}</span></p>
+            `;
+
+            breakdownContainer.innerHTML = innerHTMLStructure;
+            document.getElementById('output-card').classList.remove('hidden');
+
+            document.getElementById('universal-share-btn').onclick = () => {
+                const textMessage = generateShareableText(currentCalculatedObj);
+                executeNativeShare(textMessage);
+            };
+        }
+
+        function saveToHistory() {
+            if(!currentCalculatedObj) return;
+            
+            billHistory.unshift({
+                id: Date.now(),
+                ...currentCalculatedObj
+            });
+
+            localStorage.setItem('tenant_dynamic_history', JSON.stringify(billHistory));
+            alert("Entry logged successfully to payment records tab!");
+            currentCalculatedObj = null;
+            document.getElementById('output-card').classList.add('hidden');
+            
+            document.getElementById('prev').value = '';
+            document.getElementById('curr').value = '';
+        }
+
+        function deleteHistoryItem(id) {
+            billHistory = billHistory.filter(item => item.id !== id);
+            localStorage.setItem('tenant_dynamic_history', JSON.stringify(billHistory));
+            renderHistory();
+        }
+
+        // Global proxy function to hook history card objects directly into universal share sheet engine
+        function shareArchivedItem(id) {
+            const targetItem = billHistory.find(item => item.id === id);
+            if(targetItem) {
+                const archiveMessageText = generateShareableText(targetItem);
+                executeNativeShare(archiveMessageText);
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Permanently wipe your complete month-on-month expense logs?")) {
+                billHistory = [];
+                localStorage.removeItem('tenant_dynamic_history');
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            if(billHistory.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 text-sm py-12">No saved monthly statements found.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            billHistory.forEach(item => {
+                const log = document.createElement('div');
+                log.className = "bg-white border border-slate-100 p-4 rounded-xl shadow-sm flex justify-between items-center text-xs";
+                
+                let optionalListHTML = "";
+                if(item.optionalFields && item.optionalFields.length > 0) {
+                    item.optionalFields.forEach(f => {
+                        optionalListHTML += `<p class="text-slate-500">${f.name}: <span class="font-medium text-slate-700">Rs. ${f.value}</span></p>`;
+                    });
+                }
+
+                log.innerHTML = `
+                    <div class="space-y-1">
+                        <p class="font-bold text-sm text-slate-800">${item.date}</p>
+                        <p class="text-slate-500">Fixed Rent: <span class="font-medium text-slate-700">Rs. ${item.rent}</span></p>
+                        <p class="text-slate-500">Electricity: <span class="font-medium text-slate-700">${item.units} Units</span> (Rs. ${item.elecCost.toFixed(0)})</p>
+                        ${optionalListHTML}
+                    </div>
+                    <div class="text-right flex flex-col items-end justify-between h-full space-y-3">
+                        <div>
+                            <p class="font-black text-indigo-600 text-base leading-none">Rs. ${item.grandTotal.toFixed(0)}</p>
+                        </div>
+                        <div class="flex gap-2.5">
+                            <button onclick="shareArchivedItem(${item.id})" class="text-[10px] bg-slate-100 hover:bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded transition">📤 Share</button>
+                            <button onclick="deleteHistoryItem(${item.id})" class="text-[10px] text-red-400 hover:text-red-600 transition py-1">Remove</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(log);
+            });
+        }
+    </script>
+</body>
+</html>

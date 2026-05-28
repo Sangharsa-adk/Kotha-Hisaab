@@ -1,7 +1,7 @@
 {
   "name": "BijuliHisaab Room Tracker",
   "short_name": "BijuliHisaab",
-  "start_url": ".",
+  "start_url": "Kotha-Hisaab/index.html",
   "display": "standalone",
   "background_color": "#4f46e5",
   "theme_color": "#4f46e5",
